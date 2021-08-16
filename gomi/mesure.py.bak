@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import pigpio
+import RPi.GPIO as GPIO
+from time import sleep
+
+
+RxPin = 16      # BOARD_16
+SrPin = 18	# ALT0\18 = BOARD_12
+BasePin = 18
+PIG = pigpio.pi()
+
+def setup():
+        GPIO.setmode(GPIO.BOARD)
+
+	### Trainsiter setup (Laser Transimit)
+	GPIO.setup(BasePin, GPIO.OUT)
+	GPIO.output(BasePin, GPIO.HIGH)
+
+ 	###  Laser Receiver setup
+        GPIO.setwarnings(False)
+        GPIO.setup(RxPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+	###  Motor setup
+	PIG.set_mode(18, pigpio.ALT0)    # ALT0_pin 18 = BOARD_pin 12
+	PIG.write(18,0)
+
+def destroy():
+	### GPIO CleanUP
+        GPIO.cleanup()                          # Release resource
+	### PIGPIO CleanUP
+	PIG.set_mode(18, pigpio.INPUT)
+	PIG.stop()
+
+def loop():
+	print("sleep=0.05, step=10")
+	PIG.hardware_PWM(18, 50,1300 /20000.0 *1000000)
+	sleep(2)
+	for j in range(1,5):
+		max=0
+		min=2000
+		PIG.hardware_PWM(18, 50, 1000/20000.0 *1000000)
+		sleep(1)
+	        for i in range (1300,1600,5):
+			d=i/20000.0 *1000000
+			PIG.hardware_PWM(18, 50, d)
+			if GPIO.input(RxPin) == GPIO.HIGH:
+				if i < min:
+					min=i
+					#print("!!")
+					#sleep(10)
+			sleep(0.05)
+
+		print("%d=%d" % (j,min) )
+
+	PIG.hardware_PWM(18, 50,700/20000.0 *1000000)
+	GPIO.output(BasePin, GPIO.LOW)
+	sleep(2)
+
+if __name__ == '__main__':                      # Program start from here
+		setup()
+		try:
+			loop()
+		except KeyboardInterrupt:
+			destroy()
