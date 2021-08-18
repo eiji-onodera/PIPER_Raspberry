@@ -7,6 +7,11 @@ class red_sensor:
 	addr=None
 	data=None
 
+	env_R = 33 + 8
+	env_G = 46 + 3
+	env_B = 22 + 3
+
+
 	def __init__(self,val):
 		self.bus = smbus.SMBus(1)
 		self.addr = val
@@ -31,7 +36,7 @@ class red_sensor:
 		per_B=round(B/TOT*100)
 		self.data='R%02dG%02dB%02d' % (per_R, per_G, per_B)+'＠S11059-02Dt'
 		print( f"TOT={TOT}, R={R}% ,G={G}% ,B={B}% "+ self.data )
-		if( per_R - per_G >= 8 and per_R - per_B >=8 ):		# R率が G率,　B率どちらより8% 以上高ければ赤と判定
+		if( per_R >= self.env_R and per_G <= self.env_G and per_B <= self.env_B   ):	# R,G,B率の増加傾向から判定
 			return(True)
 		else:
 			return(False)

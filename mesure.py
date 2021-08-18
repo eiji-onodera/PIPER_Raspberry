@@ -41,9 +41,8 @@ class measure_brix:
 		print("called")
 		ave=0
 		sum=0
-		cnt=5
-		for j in range(0,cnt):
-			max=0
+		count=0
+		for j in range(0,3):
 			min=2000
 			self.PIG.hardware_PWM(self.SrPin, 50, int(1000/20000.0 *1000000) )	#計測リング開始位置に移動
 			sleep(1)
@@ -53,17 +52,21 @@ class measure_brix:
 				if GPIO.input(self.RxPin) == GPIO.HIGH:
 					if i < min:
 						min=i
+						count+=1
+						sum+=min
+						print("%d=%d "  % (j,min ))
 				sleep(0.05)
-			sum+=min
-			print("%d=%d ,ave=%d"  % (j,min,sum/(j+1))  )
 
 		GPIO.output(self.BasePin, GPIO.LOW)		#レーザー照射停止
 		self.PIG.hardware_PWM(self.SrPin, 50, int(700/20000.0 *1000000)	)		#計測リング停止位置に移動
-		self.PIG.set_mode(self.SrPin, pigpio.INPUT)
 		sleep(2)
-		ave=sum/cnt
-		print("average=%d ,at %d cnt "  % (ave,cnt)  )
-		return(ave)
+		self.PIG.set_mode(self.SrPin, pigpio.INPUT)
+		if(count > 0):
+			ave=sum/count
+			print("average=%d ,at %d count "  % (ave,count)  )
+			return(ave)
+		else:
+			return(-1)
 
 	def __del__(self):
 		# Release resource
