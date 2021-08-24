@@ -7,9 +7,15 @@ class red_sensor:
 	addr=None
 	data=None
 
-	env_R = 33 + 8
-	env_G = 46 + 3
-	env_B = 22 + 3
+#	env_R = 33 + 8
+#	env_G = 46 + 3
+#	env_B = 22 + 3
+
+	# water color rate + increse in red
+	env_R = 36 + 8
+	env_G = 39 + 3
+	env_B = 24 + 3
+
 
 
 	def __init__(self,val):
